@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from sys import argv
 from traceback import format_exc
 from controller.controle_log import ControleLog
@@ -6,6 +7,7 @@ from scripts import snmpget, snmpset
 
 aplicacao, comando = argv[0], argv[1]
 log = ControleLog(join(dirname(aplicacao), 'log'), True)
+cfg = ConfigParser()
 group_mib = {
     'Grupo System': {
         'sysDescr':  '1.3.6.1.2.1.1.1',
@@ -32,12 +34,16 @@ try:
         oid = input("Informe o OID que deseja consultar: ")
         snmpget.main(community, host, oid)
 
-    if len(argv) == 2 and aplicacao == 'principal_smnp.py' and comando == 'set':
+    elif len(argv) == 2 and aplicacao == 'principal_smnp.py' and comando == 'set':
         community = input("Informe a community: ")
         host = input("Informe o IP do Host: ")
         oid = input("Informe o OID que deseja consultar: ")
         valor = input("Informe o novo valor que deseja atribuir: ")
         snmpset.main(community, host, oid, valor)
+
+    else:
+        cfg.read(join(dirname(aplicacao), 'cfg', 'ajuda.cfg'))
+        log.info(cfg.get('Ajuda', 'uso'))
 
 except BaseException:
     mensagem = format_exc()
