@@ -5,9 +5,10 @@ from controller.controle_log import ControleLog
 from os.path import join, dirname
 from scripts import snmpget, snmpset
 
-aplicacao, comando = argv[0], argv[1]
+aplicacao, comando = argv[0], ''
 log = ControleLog(join(dirname(aplicacao), 'log'), True)
 cfg = ConfigParser()
+
 group_mib = {
     'Grupo System': {
         'sysDescr':  '1.3.6.1.2.1.1.1',
