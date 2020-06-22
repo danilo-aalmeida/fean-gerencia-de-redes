@@ -3,44 +3,66 @@ from sys import argv
 from traceback import format_exc
 from controller.controle_log import ControleLog
 from os.path import join, dirname
-from scripts import snmpget, snmpset
+from scripts import snmpget, snmpset, volume_particao
 
-aplicacao, comando = argv[0], ''
+aplicacao, comando = argv[0], argv[1]
 log = ControleLog(join(dirname(aplicacao), 'log'), True)
 cfg = ConfigParser()
 
-group_mib = {
-    'Grupo System': {
-        'sysDescr':  '1.3.6.1.2.1.1.1',
-        'sysUpTime': '1.3.6.1.2.1.1.3',
-        'sysContact': '1.3.6.1.2.1.1.4'
-    },
-    'Grupo Interface': {
-        'ifNumber': '1.3.6.1.2.1.2.1',
-        'ifOperStatus': '1.3.6.1.2.1.2.2.1.8',
-        'ifInOctets': '1.3.6.1.2.1.2.2.1.10'
+
+def _group_mib():
+    group_mib = {
+        'Grupo System': {
+            'sysDescr': '1.3.6.1.2.1.1.1.0',
+            'sysUpTime': '1.3.6.1.2.1.1.3',
+            'sysContact': '1.3.6.1.2.1.1.4'
+        },
+        'Grupo Interface': {
+            'ifNumber': '1.3.6.1.2.1.2.1',
+            'ifOperStatus': '1.3.6.1.2.1.2.2.1.8',
+            'ifInOctets': '1.3.6.1.2.1.2.2.1.10'
+        }
     }
-}
-try:
-    log.cabecalho()
     for grupo, valor in group_mib.items():
         log.info(grupo)
         log.info(f'Objeto -> ID')
         for objeto, oid in valor.items():
             log.info(f'{objeto} -> {oid}')
 
+
+try:
+    log.cabecalho()
+
     if len(argv) == 2 and aplicacao == 'principal_smnp.py' and comando == 'get':
+        _group_mib()
         community = input("Informe a community: ")
         host = input("Informe o IP do Host: ")
         oid = input("Informe o OID que deseja consultar: ")
+        # community = 'plutao/'
+        # host = '192.168.0.7'
+        # oid = '.1.3.6.1.4.1.2021.13.15.1.1.6.1'
+
         snmpget.main(community, host, oid)
 
     elif len(argv) == 2 and aplicacao == 'principal_smnp.py' and comando == 'set':
+        _group_mib()
         community = input("Informe a community: ")
         host = input("Informe o IP do Host: ")
         oid = input("Informe o OID que deseja consultar: ")
         valor = input("Informe o novo valor que deseja atribuir: ")
+        # community = 'plutao'
+        # host = '192.168.0.7'
         snmpset.main(community, host, oid, valor)
+
+    elif len(argv) == 2 and aplicacao == 'principal_smnp.py' and comando == 'av1-rec':
+        _group_mib()
+        community = input("Informe a community: ")
+        host = input("Informe o IP do Host: ")
+        # oid = input("Informe o OID que deseja consultar: ")
+        # community = 'plutao'
+        # host = '192.168.0.7'
+        volume_particao.main(community, host)
+
 
     else:
         cfg.read(join(dirname(aplicacao), 'cfg', 'ajuda.cfg'))
