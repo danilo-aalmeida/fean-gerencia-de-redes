@@ -1,3 +1,4 @@
+import json
 from pysnmp.hlapi.asyncore import *
 
 
@@ -14,12 +15,15 @@ def cbFun(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorInde
         for varBind in varBinds:
             resultados.append(
                 {'oid': varBind.__getitem__(0).prettyPrint(), 'value': varBind.__getitem__(1).prettyPrint()})
-            print(varBind)
-            # print(' = '.join([x.prettyPrint() for x in varBind]))
+        print(json.dumps(resultados))
 
 
-def main(community, host, oid):
+def main(user, md5, des, host, oid):
     snmpEngine = SnmpEngine()
-    getCmd(snmpEngine, CommunityData(community), UdpTransportTarget((host, 161)), ContextData(),
-           ObjectType(ObjectIdentity(oid)), cbFun=cbFun)
+    getCmd(snmpEngine,
+           UsmUserData(user, md5, des),
+           UdpTransportTarget((host, 161)),
+           ContextData(),
+           ObjectType(ObjectIdentity(oid)),
+           cbFun=cbFun)
     snmpEngine.transportDispatcher.runDispatcher()
